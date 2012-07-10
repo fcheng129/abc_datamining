@@ -1,28 +1,29 @@
 <?php
+require_once("models/DataInfo.php");
+
 class ABCRecord{
 	
 	private static $count= 0;
 	private $id;
 	private $contents;
-		
-	public function __construct($_contents){
+
+	public function __construct($_data){
 		$this->id= self::$count++;
+		$this->contents= array();
+		// $this->contents= array(
+			// "org"=> $_data
+		// );
 		$target= array("\"", "'");
 		$replace= "";
-		$this->contents= explode("\t", str_replace($target, $replace, $_contents));
-		$this->processData();
+		$_data= explode("\t", str_replace($target, $replace, $_data));
+		$this->processData($_data);
 	}
 	
-	public function processData(){
-	//license
-		$this->contents["license"]= substr($this->contents[0], 0, 10);
-		$this->contents["status"]= substr($this->contents[0], 13- strlen($this->contents[0]));
-		// $this->contents[0]= Array("license"=> $license, "status"=> $status);
-	//zipcode
-		$this->contents["state"]= substr($this->contents[5], 0, 2);
-		$zipcode= explode("-", substr($this->contents[5], 2, strlen($this->contents[5])- 2));
-		$this->contents["zipcode"]= $zipcode[0];
-		$this->contents["zipcode2"]= $zipcode[1];
+	public function processData($_data){
+		foreach(DataInfo::getColumns() as $key => $values){
+			$this->contents[$key]= strtolower(trim(substr($_data, $values[0]- 1, $values[1])));
+			// $this->contents[$key]= strtolower(trim(substr($this->contents["org"], $values[0]- 1, $values[1])));
+		}
 	}
 	
 	public function getContents(){
@@ -39,9 +40,9 @@ class ABCRecord{
 			if(is_array($value)){
 				$result.= "<br />";
 				foreach($value as $key1 => $value1)
-					$result.= "$indent$indent$key1: $value1<br />";
+					$result.= "$indent$indent$key1: [$value1]<br />";
 			}else
-				$result.= ": $value<br />";
+				$result.= ": [$value]<br />";
 		}
 		$result.= "}<br />";
 		return $result;

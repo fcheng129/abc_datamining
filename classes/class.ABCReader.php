@@ -35,8 +35,6 @@ class ABCReader{
     			$zip->extractTo($this->dataFolder. $this->zipfile);
     			$zip->close();
     			echo 'Extract file successfully<br />';
-				$this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
-				$this->filename= "m_tape437.LST";
 				$this->filename= "m_tape437.LST";
 				$this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
 				// $this->readFile();
@@ -46,16 +44,12 @@ class ABCReader{
 		}
 		$this->db= new DataInfo();
 	}
-	
-	function __destruct(){
-		if($this->fileHandler) fclose($this->fileHandler);
-	}
-	
+
 	public function readFile(){
 		$p= $this->paht. $this->filename;
 		if(file_exists($p)) $this->fileHandler = fopen($p, 'r');
 	}
-	
+
 	private function downloadFile ($url, $path) {
 		$newfname = $path;
 		$file = fopen ($url, "rb");
@@ -71,26 +65,34 @@ class ABCReader{
 	}
 
 	public function processListFile(){
-		// $this->db->dbInit();
+		$this->db->dbInitList();
 		$p= $this->path. $this->filename;
 		echo "file path: $p<br />";
 		if(file_exists($p)) $this->fileHandler = fopen($p, 'r');
 		$i= 0;
-		while (!feof($this->fileHandler) && $i< 30){
-		// while (!feof($this->fileHandler)){
+		// while (!feof($this->fileHandler) && $i< 10){
+		while (!feof($this->fileHandler)){
 			$i++;
-			$theData = fgets($this->fileHandler, 1024);
-			echo $theData. "<br />";
+			// $theData = fgets($this->fileHandler, 1024);
+			// echo $theData. "<br />";
+			$line= fgets($this->fileHandler, 1024);
+			// echo $line. "<br />";
+			$theData = new ABCRecord($line);
+			// $theData->display();
+			$this->db->writeDataList($theData);
 		}
 		echo "Total $i records ..... Read Completed.<br /><br />";
 		if($this->fileHandler) fclose($this->fileHandler);
 	}
 
-	public function process(){
+	public function processXls(){
 		// $theData = fgetcsv($fh, 2048, ",");
 		// echo "Date_". Date("Ym");
 		//$this->dbInit("Data_". date("Ymd"));
-		$this->db->dbInit();
+		$this->db->dbInitXls();
+		$p= $this->path. $this->filename;
+		echo "file path: $p<br />";
+		if(file_exists($p)) $this->fileHandler = fopen($p, 'r');
 		$i= 0;
 		// while (!feof($this->fileHandler) && $i< 30){
 		while (!feof($this->fileHandler)){
@@ -103,21 +105,22 @@ class ABCReader{
 			// echo "<br /><br />";
 			$theData2= new ABCRecord($theData);
 			// $theData2->display();
-			$this->db->writeData($theData2);
+			$this->db->writeDataXls($theData2);
 		}
 		echo "Total $i records ..... Read Completed.<br /><br />";
+		if($this->fileHandler) fclose($this->fileHandler);
 	}
 	
-	public function outputLosangelesResult($_dataTableName){
-		$this->db->outputLosangelesResult($_dataTableName, "los_angeles.csv");
+	public function outputLosangelesResultXls($_dataTableName){
+		$this->db->outputLosangelesResultXls($_dataTableName, "los_angeles.csv");
 	}
 	
 	public function outputSanbarndardinoResult($_dataTableName){
-		$this->db->outputSanbarndardinoResult($_dataTableName, "sanbarndardino.csv");
+		$this->db->outputSanbarndardinoResultXls($_dataTableName, "sanbarndardino.csv");
 	}
 	
 	public function outputVenturaResult($_dataTableName){
-		$this->db->outputVenturaResult($_dataTableName, "ventura.csv");
+		$this->db->outputVenturaResultXls($_dataTableName, "ventura.csv");
 	}
 }
 ?>
