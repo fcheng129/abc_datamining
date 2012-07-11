@@ -93,7 +93,7 @@ class DataInfo extends MySQL{
 		$col_seperator= ",";
 		$col_enclosure= "\"";
 		$colName= "";
-		$zipCodeColumns= array("name"=> 0);
+		$zipCodeColumns= array("city_name"=> 0);
 		$selColName= "";
 		// $seperator= ", ";
 		foreach(self::$colums as $key => $values){
