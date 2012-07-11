@@ -21,27 +21,30 @@ class ABCReader{
 			// $this->readFile();
 			// if(file_exists($this->path. $this->filename)) $this->readFile();
 		}else{
+			$originZipfile= "http://www.abc.ca.gov/datport/ABC_Data_Export.zip";
 			$this->zipfile= DATA_FILENAME_PREFIX. date("Ymd"). ".zip";
 			$this->downloadFolder= "download". DIRECTORY_SEPARATOR;
 			$this->dataFolder= "data". DIRECTORY_SEPARATOR;
 			// $zipfile= "download". DIRECTORY_SEPARATOR. DATA_FILENAME_PREFIX. date("Ymd"). ".zip";
 			$zipPath= $this->downloadFolder. $this->zipfile;
-			echo "zipfile: ". $zipPath. "<br />";
-
-			$this->downloadFile("http://www.abc.ca.gov/datport/ABC_Data_Export.zip", $zipPath);
+			echo "Downloading File<br />";
+			echo "&nbsp;&nbsp;&nbsp;Origin Zip File: ". $originZipfile. "<br />";
+			echo "&nbsp;&nbsp;&nbsp;Taget Zip File: ". $zipPath. "<br />";
+			$this->downloadFile($originZipfile, $zipPath);
 			
 			// $this->filename= "m_tape437.LST";
 			// $this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
+			echo "Extracting File<br />";
 			$zip = new ZipArchive;
 			if ($zip->open($zipPath)) {
     			$zip->extractTo($this->dataFolder. $this->zipfile);
     			$zip->close();
-    			echo 'Extract file successfully<br />';
+    			echo '&nbsp;&nbsp;&nbsp;Extract file successfully<br />'; flush();
 				$this->filename= "m_tape437.LST";
 				$this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
 				// $this->readFile();
 			} else {
-    			echo 'Failed to read the zip file<br />';
+    			echo '&nbsp;&nbsp;&nbsp;Failed to read the zip file<br />'; flush();
 			}
 		}
 		$this->db= new DataInfo();
@@ -67,9 +70,10 @@ class ABCReader{
 	}
 
 	public function processListFile(){
+		echo "Processing Data<br />";
 		$this->db->dbInitList();
 		$p= $this->path. $this->filename;
-		echo "file path: $p<br />";
+		echo "&nbsp;&nbsp;&nbsp;file path: $p<br />";
 		if(file_exists($p)) $this->fileHandler = fopen($p, 'r');
 		$i= 0;
 		// while (!feof($this->fileHandler) && $i< 10){
@@ -83,10 +87,11 @@ class ABCReader{
 				$i++;
 				$theData = new ABCRecord($line);
 				// $theData->display();
+				// echo "Writing...<br />";
 				$this->db->writeDataList($theData);
 			}
 		}
-		echo "Total $i records ..... Read Completed.<br /><br />";
+		echo "&nbsp;&nbsp;&nbsp;Total $i records ..... Read Completed.<br /><br />";
 		if($this->fileHandler) fclose($this->fileHandler);
 	}
 	

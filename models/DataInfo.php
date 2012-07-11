@@ -50,9 +50,10 @@ class DataInfo extends MySQL{
 	}
 
 	public function dbInitList(){
+		// echo "Drop<br />";
 		$sql= "DROP TABLE IF EXISTS `". $this->tableName. DATA_TABLE_LIST_POSTFIX. "`;";
 		$this->runSQL($sql);
-		
+		// echo "Create<br />";
 		$colName= "";
 		foreach(self::$colums as $key => $values){
 			$colName.= "`$key` varchar($values[1]) NOT NULL,";
@@ -68,6 +69,7 @@ class DataInfo extends MySQL{
 	}
 
 	public function writeDataList($_rec){
+		// echo "write data.<br />";
 		// $contents= $_rec->getContents();
 		$colName= "";
 		$colValue= "";
@@ -87,23 +89,30 @@ class DataInfo extends MySQL{
 	
 	public function findZipcodeList($_dataTableName, $_filename, $_zipcodeTableName){
 		$dataTableAbbr= "d";
+		$zipTableAbbr= "z";
 		$col_seperator= ",";
 		$col_enclosure= "\"";
 		$colName= "";
+		$zipCodeColumns= array("name"=> 0);
 		$selColName= "";
 		// $seperator= ", ";
 		foreach(self::$colums as $key => $values){
 			$selColName.= "$dataTableAbbr.`$key`". $col_seperator;
 			$colName.= "$key". $col_seperator;
 		}
+		foreach($zipCodeColumns as $key => $value){
+			$selColName.= "$zipTableAbbr.`$key`". $col_seperator;
+			$colName.= "$key". $col_seperator;
+		}
 		$selColName= substr($selColName, 0, strlen($selColName)- strlen($col_seperator));
 		$colName= substr($colName, 0, strlen($colName)- strlen($col_seperator));
+		// echo $colName. "<br />";
 		$sql=
 			"SELECT ". $selColName. 
-			" FROM `". $_dataTableName. DATA_TABLE_LIST_POSTFIX. "` AS $dataTableAbbr, $_zipcodeTableName AS z".
+			" FROM `". $_dataTableName. DATA_TABLE_LIST_POSTFIX. "` AS $dataTableAbbr, $_zipcodeTableName AS $zipTableAbbr".
 			" WHERE $dataTableAbbr.`premist_zip` = z.`zipcode`".
 			" ORDER BY $dataTableAbbr.`premist_zip`";
-		// echo $sql. "<br />";
+		echo $sql. "<br />";
 		$i= 0;
 		$fp = fopen($_filename, 'w');
 		fwrite($fp, $colName. "\r\n");
@@ -123,6 +132,9 @@ class DataInfo extends MySQL{
 				// echo $rowRs[$j]. "&nbsp;&nbsp;&nbsp;";
 				$output.= "=". $col_enclosure. $rowRs[$key]. $col_enclosure. $col_seperator;
 				//fwrite($fp, $rowRs[$j]. ",");
+			}
+			foreach($zipCodeColumns as $key => $value){
+				$output.= "=". $col_enclosure. $rowRs[$key]. $col_enclosure. $col_seperator;
 			}
 			// echo "<br />";
 			fwrite($fp, substr($output, 0, strlen($output)- strlen($col_seperator)). "\r\n");
