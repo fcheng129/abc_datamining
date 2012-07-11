@@ -63,7 +63,7 @@ class DataInfo extends MySQL{
 				$colName.
   				"PRIMARY KEY (`id`)".
 			") ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;";
-		echo $sql. "<br />";
+		// echo $sql. "<br />";
 		$this->runSQL($sql);
 	}
 
@@ -81,8 +81,66 @@ class DataInfo extends MySQL{
 		$sql= 
 			"INSERT INTO `". $this->tableName. DATA_TABLE_LIST_POSTFIX. "` (". $colName. ")".
 			" VALUES (". $colValue. ");";
-		echo $sql. "<br />";
+		// echo $sql. "<br />";
 		$this->runSQL($sql);
+	}
+	
+	public function findZipcodeList($_dataTableName, $_filename, $_zipcodeTableName){
+		$dataTableAbbr= "d";
+		$col_seperator= ",";
+		$col_enclosure= "\"";
+		$colName= "";
+		$selColName= "";
+		// $seperator= ", ";
+		foreach(self::$colums as $key => $values){
+			$selColName.= "$dataTableAbbr.`$key`". $col_seperator;
+			$colName.= "$key". $col_seperator;
+		}
+		$selColName= substr($selColName, 0, strlen($selColName)- strlen($col_seperator));
+		$colName= substr($colName, 0, strlen($colName)- strlen($col_seperator));
+		$sql=
+			"SELECT ". $selColName. 
+			" FROM `". $_dataTableName. DATA_TABLE_LIST_POSTFIX. "` AS $dataTableAbbr, $_zipcodeTableName AS z".
+			" WHERE $dataTableAbbr.`premist_zip` = z.`zipcode`".
+			" ORDER BY $dataTableAbbr.`premist_zip`";
+		// echo $sql. "<br />";
+		$i= 0;
+		$fp = fopen($_filename, 'w');
+		fwrite($fp, $colName. "\r\n");
+		$rs= $this->runSQL($sql);
+		$num_rows = $this->rowCount($rs);
+		
+		while ($rowRs= $this->fetchRow($rs)) {
+			// print_r($rowRs);
+			// echo "<br />";
+			$i++;
+			// echo (sizeof($rowRs)/ 2);
+			$output= "";
+			//j starts at 1 because the id col is not required.
+			// for($j= 1; $j< (sizeof($rowRs)/ 2); $j++){
+			foreach(self::$colums as $key => $values){
+				// echo $j. "<br />";
+				// echo $rowRs[$j]. "&nbsp;&nbsp;&nbsp;";
+				$output.= "=". $col_enclosure. $rowRs[$key]. $col_enclosure. $col_seperator;
+				//fwrite($fp, $rowRs[$j]. ",");
+			}
+			// echo "<br />";
+			fwrite($fp, substr($output, 0, strlen($output)- strlen($col_seperator)). "\r\n");
+		}
+		if($fp) fclose($fp);
+		echo "<a href=\"$_filename\">$_filename</a><br /><br />";
+	}
+	
+	public function outputLosangelesResultList($_dataTableName, $_filename){
+		$this->findZipcodeList($_dataTableName, $_filename, "losangeles");
+	}
+	
+	public function outputSanbarndardinoResultList($_dataTableName, $_filename){
+		$this->findZipcodeList($_dataTableName, $_filename, "sanbarndardino");
+	}
+	
+	public function outputVenturaResultList($_dataTableName, $_filename){
+		$this->findZipcodeList($_dataTableName, $_filename, "ventura");
 	}
 
 	public function dbInitXls(){

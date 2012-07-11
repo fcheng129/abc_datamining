@@ -30,6 +30,8 @@ class ABCReader{
 
 			$this->downloadFile("http://www.abc.ca.gov/datport/ABC_Data_Export.zip", $zipPath);
 			
+			// $this->filename= "m_tape437.LST";
+			// $this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
 			$zip = new ZipArchive;
 			if ($zip->open($zipPath)) {
     			$zip->extractTo($this->dataFolder. $this->zipfile);
@@ -72,19 +74,34 @@ class ABCReader{
 		$i= 0;
 		// while (!feof($this->fileHandler) && $i< 10){
 		while (!feof($this->fileHandler)){
-			$i++;
+			
 			// $theData = fgets($this->fileHandler, 1024);
 			// echo $theData. "<br />";
 			$line= fgets($this->fileHandler, 1024);
 			// echo $line. "<br />";
-			$theData = new ABCRecord($line);
-			// $theData->display();
-			$this->db->writeDataList($theData);
+			if($line){
+				$i++;
+				$theData = new ABCRecord($line);
+				// $theData->display();
+				$this->db->writeDataList($theData);
+			}
 		}
 		echo "Total $i records ..... Read Completed.<br /><br />";
 		if($this->fileHandler) fclose($this->fileHandler);
 	}
-
+	
+	public function outputLosangelesResultList($_dataTableName){
+		// echo "outputLosangelesResultList<br />";
+		$this->db->outputLosangelesResultList($_dataTableName, "los_angeles.csv");
+	}
+	
+	public function outputSanbarndardinoResultList($_dataTableName){
+		$this->db->outputSanbarndardinoResultList($_dataTableName, "sanbarndardino.csv");
+	}
+	
+	public function outputVenturaResultList($_dataTableName){
+		$this->db->outputVenturaResultList($_dataTableName, "ventura.csv");
+	}
 	public function processXls(){
 		// $theData = fgetcsv($fh, 2048, ",");
 		// echo "Date_". Date("Ym");
@@ -115,11 +132,11 @@ class ABCReader{
 		$this->db->outputLosangelesResultXls($_dataTableName, "los_angeles.csv");
 	}
 	
-	public function outputSanbarndardinoResult($_dataTableName){
+	public function outputSanbarndardinoResultXls($_dataTableName){
 		$this->db->outputSanbarndardinoResultXls($_dataTableName, "sanbarndardino.csv");
 	}
 	
-	public function outputVenturaResult($_dataTableName){
+	public function outputVenturaResultXls($_dataTableName){
 		$this->db->outputVenturaResultXls($_dataTableName, "ventura.csv");
 	}
 }

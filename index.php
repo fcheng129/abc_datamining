@@ -5,8 +5,12 @@ include_once("include/config.php");
 // $a= new ABCReader("m_tape437.xls");
 
 $b= new ABCReader();
-
+echo "processing<br />";
 $b->processListFile();
+echo "output<br />";
+$b->outputLosangelesResultList(DATA_TABLE_PREFIX. date("Ymd"));
+$b->outputSanbarndardinoResultList(DATA_TABLE_PREFIX. date("Ymd"));
+$b->outputVenturaResultList(DATA_TABLE_PREFIX. date("Ymd"));
 // $a->process();
 // $a->outputLosangelesResult(DATA_TABLE_PREFIX. date("Ymd"));
 // $a->outputSanbarndardinoResult(DATA_TABLE_PREFIX. date("Ymd"));

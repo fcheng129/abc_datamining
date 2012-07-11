@@ -15,7 +15,7 @@ class ABCRecord{
 		// );
 		$target= array("\"", "'");
 		$replace= "";
-		$_data= explode("\t", str_replace($target, $replace, $_data));
+		$_data= str_replace($target, $replace, $_data);
 		$this->processData($_data);
 	}
 	
