@@ -40,9 +40,12 @@ class DataInfo extends MySQL{
 		"mail_zip"=> array(428, 10)
 	);
 	
-	public function __construct(){
+	public function __construct($_tableName){
 		parent::__construct($this->servername, $this->dbname, $this->dbusername, $this->dbpassword);
-		$this->tableName= DATA_TABLE_PREFIX. date("Ymd");
+		if($_tableName)
+			$this->tableName= DATA_TABLE_PREFIX. $_tableName;
+		else
+			$this->tableName= DATA_TABLE_PREFIX. date("Ymd");
 	}
 	
 	public static function getColumns(){
@@ -112,17 +115,18 @@ class DataInfo extends MySQL{
 			" FROM `". $_dataTableName. DATA_TABLE_LIST_POSTFIX. "` AS $dataTableAbbr, $_zipcodeTableName AS $zipTableAbbr".
 			" WHERE $dataTableAbbr.`premist_zip` = z.`zipcode`".
 			" ORDER BY $dataTableAbbr.`premist_zip`";
-		echo $sql. "<br />";
-		$i= 0;
+		// echo $sql. "<br />";
+		//$i= 0;
 		$fp = fopen($_filename, 'w');
 		fwrite($fp, $colName. "\r\n");
 		$rs= $this->runSQL($sql);
 		$num_rows = $this->rowCount($rs);
+		// printf("total row: %d<br />", $num_rows);
 		
 		while ($rowRs= $this->fetchRow($rs)) {
 			// print_r($rowRs);
 			// echo "<br />";
-			$i++;
+			//$i++;
 			// echo (sizeof($rowRs)/ 2);
 			$output= "";
 			//j starts at 1 because the id col is not required.
@@ -140,20 +144,20 @@ class DataInfo extends MySQL{
 			fwrite($fp, substr($output, 0, strlen($output)- strlen($col_seperator)). "\r\n");
 		}
 		if($fp) fclose($fp);
-		echo "<a href=\"$_filename\">$_filename</a><br /><br />";
+		return $num_rows;
 	}
 	
-	public function outputLosangelesResultList($_dataTableName, $_filename){
-		$this->findZipcodeList($_dataTableName, $_filename, "losangeles");
-	}
-	
-	public function outputSanbarndardinoResultList($_dataTableName, $_filename){
-		$this->findZipcodeList($_dataTableName, $_filename, "sanbarndardino");
-	}
-	
-	public function outputVenturaResultList($_dataTableName, $_filename){
-		$this->findZipcodeList($_dataTableName, $_filename, "ventura");
-	}
+	// public function outputLosangelesResultList($_dataTableName, $_filename){
+		// return $this->findZipcodeList($_dataTableName, $_filename, "losangeles");
+	// }
+// 	
+	// public function outputSanbarndardinoResultList($_dataTableName, $_filename){
+		// return $this->findZipcodeList($_dataTableName, $_filename, "sanbarndardino");
+	// }
+// 	
+	// public function outputVenturaResultList($_dataTableName, $_filename){
+		// return $this->findZipcodeList($_dataTableName, $_filename, "ventura");
+	// }
 
 	public function dbInitXls(){
 		$sql= "DROP TABLE IF EXISTS `". $this->tableName. DATA_TABLE_XLS_POSTFIX. "`;";

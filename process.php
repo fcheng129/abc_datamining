@@ -1,4 +1,7 @@
 <?php
+require_once('classes/class.Login.php');
+Login::validateSession(30* 60, 'http://'. $_SERVER['SERVER_NAME']. '/login.php');
+
 include_once("classes/class.ABCReader.php");
 include_once("include/config.php");
 
@@ -6,7 +9,7 @@ include_once("include/config.php");
 
 $b= new ABCReader();
 $b->processListFile();
-echo "Output Files: <br /><br />";
+echo "Output Files: <br />";
 $b->outputLosangelesResultList(DATA_TABLE_PREFIX. date("Ymd"));
 $b->outputSanbarndardinoResultList(DATA_TABLE_PREFIX. date("Ymd"));
 $b->outputVenturaResultList(DATA_TABLE_PREFIX. date("Ymd"));

@@ -30,10 +30,14 @@ class ABCReader{
 			echo "Downloading File<br />";
 			echo "&nbsp;&nbsp;&nbsp;Origin Zip File: ". $originZipfile. "<br />";
 			echo "&nbsp;&nbsp;&nbsp;Taget Zip File: ". $zipPath. "<br />";
-			$this->downloadFile($originZipfile, $zipPath);
-			
+
+
 			// $this->filename= "m_tape437.LST";
 			// $this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
+
+
+			$this->downloadFile($originZipfile, $zipPath);
+
 			echo "Extracting File<br />";
 			$zip = new ZipArchive;
 			if ($zip->open($zipPath)) {
@@ -95,17 +99,29 @@ class ABCReader{
 		if($this->fileHandler) fclose($this->fileHandler);
 	}
 	
+	private function outputResultList($_dataTableName, $_tableName){
+		$fileType= ".csv";
+		$rowNum= $this->db->findZipcodeList($_dataTableName, $_tableName. $fileType, $_tableName);
+		echo "<a href=\"$_tableName$fileType\">$_tableName$fileType</a>&nbsp;&nbsp;($rowNum Record(s))<br />";
+	}
+	
 	public function outputLosangelesResultList($_dataTableName){
 		// echo "outputLosangelesResultList<br />";
-		$this->db->outputLosangelesResultList($_dataTableName, "los_angeles.csv");
+		$this->outputResultList($_dataTableName, "losangeles");
 	}
 	
 	public function outputSanbarndardinoResultList($_dataTableName){
-		$this->db->outputSanbarndardinoResultList($_dataTableName, "sanbarndardino.csv");
+		// $filename= "sanbarndardino.csv";
+		// $this->db->outputSanbarndardinoResultList($_dataTableName, $filename);
+		// echo "<a href=\"$filename\">$filename</a>&nbsp;&nbsp; ($rowNum Record(s)<br />";
+		$this->outputResultList($_dataTableName, "sanbarndardino");
 	}
 	
 	public function outputVenturaResultList($_dataTableName){
-		$this->db->outputVenturaResultList($_dataTableName, "ventura.csv");
+		// $filename= "ventura.csv";
+		// $rowNum=$this->db->outputVenturaResultList($_dataTableName, $filename);
+		// echo "<a href=\"$filename\">$filename</a>&nbsp;&nbsp; ($rowNum Record(s)<br />";
+		$this->outputResultList($_dataTableName, "ventura");
 	}
 	public function processXls(){
 		// $theData = fgetcsv($fh, 2048, ",");
