@@ -99,30 +99,38 @@ class ABCReader{
 		if($this->fileHandler) fclose($this->fileHandler);
 	}
 	
-	private function outputResultList($_dataTableName, $_tableName){
+	public function outputResultList($_dataTableName){
+		$tableName= array("los_angeles", "san_barndardino", "ventura", "san_luis_obispo", "kern", "santa_barbara", "orange", "riverside", "san_diego", "imperial");
 		$fileType= ".csv";
-		$rowNum= $this->db->findZipcodeList($_dataTableName, $_tableName. $fileType, $_tableName);
-		echo "<a href=\"$_tableName$fileType\">$_tableName$fileType</a>&nbsp;&nbsp;($rowNum Record(s))<br />";
+		foreach($tableName as $value){
+			$rowNum= $this->db->findZipcodeList(DATA_TABLE_PREFIX. $_dataTableName, $value. $fileType, DATA_ZIPCODE_TABLE_POSTFIX. $value);
+			echo "<a href=\"$value$fileType\">$value$fileType</a>&nbsp;&nbsp;($rowNum Record(s))<br />";
+		}
 	}
-	
-	public function outputLosangelesResultList($_dataTableName){
-		// echo "outputLosangelesResultList<br />";
-		$this->outputResultList($_dataTableName, "losangeles");
-	}
-	
-	public function outputSanbarndardinoResultList($_dataTableName){
-		// $filename= "sanbarndardino.csv";
-		// $this->db->outputSanbarndardinoResultList($_dataTableName, $filename);
-		// echo "<a href=\"$filename\">$filename</a>&nbsp;&nbsp; ($rowNum Record(s)<br />";
-		$this->outputResultList($_dataTableName, "sanbarndardino");
-	}
-	
-	public function outputVenturaResultList($_dataTableName){
-		// $filename= "ventura.csv";
-		// $rowNum=$this->db->outputVenturaResultList($_dataTableName, $filename);
-		// echo "<a href=\"$filename\">$filename</a>&nbsp;&nbsp; ($rowNum Record(s)<br />";
-		$this->outputResultList($_dataTableName, "ventura");
-	}
+	// private function outputResultList($_dataTableName, $_tableName){
+		// $fileType= ".csv";
+		// $rowNum= $this->db->findZipcodeList($_dataTableName, $_tableName. $fileType, $_tableName);
+		// echo "<a href=\"$_tableName$fileType\">$_tableName$fileType</a>&nbsp;&nbsp;($rowNum Record(s))<br />";
+	// }
+// 	
+	// public function outputLosangelesResultList($_dataTableName){
+		// // echo "outputLosangelesResultList<br />";
+		// $this->outputResultList($_dataTableName, "losangeles");
+	// }
+// 	
+	// public function outputSanbarndardinoResultList($_dataTableName){
+		// // $filename= "sanbarndardino.csv";
+		// // $this->db->outputSanbarndardinoResultList($_dataTableName, $filename);
+		// // echo "<a href=\"$filename\">$filename</a>&nbsp;&nbsp; ($rowNum Record(s)<br />";
+		// $this->outputResultList($_dataTableName, "sanbarndardino");
+	// }
+// 	
+	// public function outputVenturaResultList($_dataTableName){
+		// // $filename= "ventura.csv";
+		// // $rowNum=$this->db->outputVenturaResultList($_dataTableName, $filename);
+		// // echo "<a href=\"$filename\">$filename</a>&nbsp;&nbsp; ($rowNum Record(s)<br />";
+		// $this->outputResultList($_dataTableName, "ventura");
+	// }
 	public function processXls(){
 		// $theData = fgetcsv($fh, 2048, ",");
 		// echo "Date_". Date("Ym");
