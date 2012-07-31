@@ -1,4 +1,5 @@
 <?
+require_once("include/config.php");
 require_once('models/UserInfo.php');
 // require_once('class.msg.php');
 require_once('class.LoginSession.php');
@@ -38,15 +39,16 @@ class Login{
 		return $id;
 	}
 	
-	public static function validateSession($_maxElapsedTime, $_redirectLink){
+	// public static function validateSession($_maxElapsedTime, $_redirectLink){
+	public static function validateSession(){
 		// global $loginSession;
 		$loginSession= LoginSession::getInstance();
 		$elapsed= time()- $loginSession->getTimeSession();
 		// msg::display("elapsed", $elapsed);
-		if($elapsed> $_maxElapsedTime) {
+		if($elapsed> AUTO_LOGOUT_TIME) {
 			// msg::oc("expired");
 			// msg::oc('Location: '. $_redirectLink);
-			header('Location: '. $_redirectLink);
+			header('Location: '. 'http://'. $_SERVER['SERVER_NAME']. "/". LOGIN_PAGE);
 			die();
 		}
 	}

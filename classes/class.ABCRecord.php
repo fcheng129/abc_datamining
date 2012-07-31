@@ -21,7 +21,7 @@ class ABCRecord{
 	
 	public function processData($_data){
 		foreach(DataInfo::getColumns() as $key => $values){
-			$this->contents[$key]= strtolower(trim(substr($_data, $values[0]- 1, $values[1])));
+			$this->contents[$key]= strtolower(trim(substr($_data, $values["startAt"]- 1, $values["size"])));
 			// $this->contents[$key]= strtolower(trim(substr($this->contents["org"], $values[0]- 1, $values[1])));
 		}
 	}

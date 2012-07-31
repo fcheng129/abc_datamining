@@ -15,43 +15,55 @@ class ABCReader{
 	private $db;
 	
 	function __construct($_filename= NULL, $_path= ""){
+		$this->zipfile= DATA_FILENAME_PREFIX. date("Ymd"). ".zip";
+		$this->downloadFolder= "download". DIRECTORY_SEPARATOR;
+		$this->dataFolder= "data". DIRECTORY_SEPARATOR;
+		$this->filename= "m_tape437.LST";
+		$this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
+		
 		if($_filename){
 			$this->filename= $_filename;
 			$this->path= $_path;
 			// $this->readFile();
 			// if(file_exists($this->path. $this->filename)) $this->readFile();
-		}else{
-			$originZipfile= "http://www.abc.ca.gov/datport/ABC_Data_Export.zip";
-			$this->zipfile= DATA_FILENAME_PREFIX. date("Ymd"). ".zip";
-			$this->downloadFolder= "download". DIRECTORY_SEPARATOR;
-			$this->dataFolder= "data". DIRECTORY_SEPARATOR;
-			// $zipfile= "download". DIRECTORY_SEPARATOR. DATA_FILENAME_PREFIX. date("Ymd"). ".zip";
-			$zipPath= $this->downloadFolder. $this->zipfile;
-			echo "Downloading File<br />";
-			echo "&nbsp;&nbsp;&nbsp;Origin Zip File: ". $originZipfile. "<br />";
-			echo "&nbsp;&nbsp;&nbsp;Taget Zip File: ". $zipPath. "<br />";
-
-
-			// $this->filename= "m_tape437.LST";
-			// $this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
-
-
-			$this->downloadFile($originZipfile, $zipPath);
-
-			echo "Extracting File<br />";
-			$zip = new ZipArchive;
-			if ($zip->open($zipPath)) {
-    			$zip->extractTo($this->dataFolder. $this->zipfile);
-    			$zip->close();
-    			echo '&nbsp;&nbsp;&nbsp;Extract file successfully<br />'; flush();
-				$this->filename= "m_tape437.LST";
-				$this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
-				// $this->readFile();
-			} else {
-    			echo '&nbsp;&nbsp;&nbsp;Failed to read the zip file<br />'; flush();
-			}
 		}
 		$this->db= new DataInfo();
+	}
+
+	public function downloading(){
+		$originZipfile= "http://www.abc.ca.gov/datport/ABC_Data_Export.zip";
+
+		// $zipfile= "download". DIRECTORY_SEPARATOR. DATA_FILENAME_PREFIX. date("Ymd"). ".zip";
+		$zipPath= $this->downloadFolder. $this->zipfile;
+		echo "Downloading File<br />";
+		echo "&nbsp;&nbsp;&nbsp;Origin Zip File: ". $originZipfile. "<br />";
+		echo "&nbsp;&nbsp;&nbsp;Taget Zip File: ". $zipPath. "<br />";
+
+
+		$this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
+		// try{
+		$this->downloadFile($originZipfile, $zipPath);
+		// }catch(Exception $e){
+			// echo "Failed to download file! (Error ". $e->getMessage(). ")";
+			// die();
+		// }
+		return true;
+	}
+
+	public function extracting(){
+		echo "Extracting File<br />";
+		$zipPath= $this->downloadFolder. $this->zipfile;
+		$zip = new ZipArchive;
+		if ($zip->open($zipPath)) {
+    		$zip->extractTo($this->dataFolder. $this->zipfile);
+    		$zip->close();
+    		echo '&nbsp;&nbsp;&nbsp;Extract file successfully<br />'; flush();
+			// $this->filename= "m_tape437.LST";
+			$this->path= $this->dataFolder. $this->zipfile. DIRECTORY_SEPARATOR;
+			// $this->readFile();
+		} else {
+    		echo '&nbsp;&nbsp;&nbsp;Failed to read the zip file<br />'; flush();
+		}
 	}
 
 	public function readFile(){
@@ -77,12 +89,13 @@ class ABCReader{
 		echo "Processing Data<br />";
 		$this->db->dbInitList();
 		$p= $this->path. $this->filename;
+		// $p= $this->filename;
 		echo "&nbsp;&nbsp;&nbsp;file path: $p<br />";
 		if(file_exists($p)) $this->fileHandler = fopen($p, 'r');
 		$i= 0;
-		// while (!feof($this->fileHandler) && $i< 10){
+		// while (!feof($this->fileHandler) && $i< 100){
 		while (!feof($this->fileHandler)){
-			
+			// $i++;
 			// $theData = fgets($this->fileHandler, 1024);
 			// echo $theData. "<br />";
 			$line= fgets($this->fileHandler, 1024);
@@ -95,16 +108,21 @@ class ABCReader{
 				$this->db->writeDataList($theData);
 			}
 		}
-		echo "&nbsp;&nbsp;&nbsp;Total $i records ..... Read Completed.<br /><br />";
+		echo "&nbsp;&nbsp;&nbsp;Total $i records ..... Read Completed.<br />";
 		if($this->fileHandler) fclose($this->fileHandler);
 	}
 	
 	public function outputResultList($_dataTableName){
 		$tableName= array("los_angeles", "san_barndardino", "ventura", "san_luis_obispo", "kern", "santa_barbara", "orange", "riverside", "san_diego", "imperial");
+		// $tableName= array("los_angeles");
 		$fileType= ".csv";
+		echo "Output Files: <br />";
 		foreach($tableName as $value){
-			$rowNum= $this->db->findZipcodeList(DATA_TABLE_PREFIX. $_dataTableName, $value. $fileType, DATA_ZIPCODE_TABLE_POSTFIX. $value);
-			echo "<a href=\"$value$fileType\">$value$fileType</a>&nbsp;&nbsp;($rowNum Record(s))<br />";
+			$rowNum= $this->db->findZipcodeAllList(DATA_TABLE_PREFIX. $_dataTableName, $value. $fileType, DATA_ZIPCODE_TABLE_POSTFIX. $value);
+			echo "&nbsp;&nbsp;&nbsp;<a href=\"$value$fileType\">$value$fileType</a>&nbsp;&nbsp;($rowNum Record". ($rowNum> 1? "s": "").")<br />";
+			$rowNum= $this->db->findZipcodeActiveList(DATA_TABLE_PREFIX. $_dataTableName, $value. "_active_list". $fileType, DATA_ZIPCODE_TABLE_POSTFIX. $value);
+			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"$value". "_active_list". "$fileType\">$value". "_active_list". "$fileType</a>&nbsp;&nbsp;($rowNum Active Record". ($rowNum> 1? "s": "").")<br />";
+			echo "<br />";
 		}
 	}
 	// private function outputResultList($_dataTableName, $_tableName){

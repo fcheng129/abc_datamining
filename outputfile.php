@@ -8,5 +8,5 @@ include_once("include/config.php");
 // $a= new ABCReader("m_tape437.xls");
 
 $b= new ABCReader();
-$b->processListFile();
+$b->outputResultList(date("Ymd"));
 ?>
