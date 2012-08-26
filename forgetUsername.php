@@ -1,13 +1,7 @@
 <?
 require_once('classes/class.Login.php');
-require_once('classes/class.ConstVar.php');
-// require_once('classes/class.msg.php');
-
-if(isset($_GET["action"])){
-	if(trim($_GET["action"])== "logout"){
-		Login::logoutSession();
-	}
-}
+require_once('classes/class.msg.php');
+require_once('classes/class.AccountEmail.php');
 
 if(!isset($_POST["log"])){
 	$log= 0;
@@ -16,12 +10,19 @@ if(!isset($_POST["log"])){
 	$log= intval($_POST["log"])+ 1;
 	$_POST["log"]= strval($log);	
 }
-
-$l= new Login();
-// $id= $l->validation($_POST['username'], $_POST['password']);
-$isLogin= $l->validation($_POST["username"], $_POST["password"], 'http://'. $_SERVER['SERVER_NAME']. '/index.php')!= ConstVar::DB_USER_ID_NOT_FOUND;
-// $isLogin= $l->validation($_POST["username"], $_POST["password"])!= Login::NO_ID;
-// echo "id: $id&nbsp;&nbsp;&nbsp;". ($isLogin? "good": "bad"). "<br />";
+$isEmailFound= false;
+$isEmailSent= false;
+if(isset($_POST["email"])){
+	$l= new Login();
+	//msg::ot("trying login ". $_POST["username"]. " w password ". $_POST["password"]);
+	$username= $l->findUsername($_POST["email"]);
+	if(strlen(trim($username))> 0){
+		$isEmailFound= true;
+		$e= new AccountEmail();
+		$e->addRecipent($_POST["email"]);
+		$isEmailSent= $e->send(trim($username));
+	}
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -77,49 +78,39 @@ $isLogin= $l->validation($_POST["username"], $_POST["password"], 'http://'. $_SE
 }
 -->
 </style>
+<script src="js/countdownRedirect.js" type="text/javascript"></script>
 </head>
 
-<body onload="document.getElementById('username').focus();">
+<body <? if($isEmailFound && $isEmailSent) echo "onload='countdownRedirect(\"http://". $_SERVER['SERVER_NAME']. "/login.php\")'"; ?>>
 
 <div id="container">
-	<form method="post" action="login.php" name="loginForm">
+	<form method="post" action="forgetUsername.php">
 		<table width="381" border="0" cellspacing="0" cellpadding="0">
 			<tr>
 				<th height="36" width="80" scope="row">&nbsp;</th>
 				<td width="165">
 				<div class="inputTableRow">
-					<strong>Login Page</strong>
+					<strong>Look Up Username</strong>
 					<input type="hidden" name="log" value="0" /></div>
 				</td>
 				<td width="136" height="36">&nbsp;</td>
 			</tr>
 			<tr>
-				<th height="35" scope="row">Username</th>
+				<th height="35" scope="row">Email</th>
 				<td>
 				<div class="inputTableRow">
-					<input name="username" id="username" type="text" style="width: 150px; height: 22px" tabindex="1" />
+					<input name="email" type="text" style="width: 150px; height: 22px" />
 				</div>
 				</td>
 				<td height="35">
-				<div class="forgetLink"><a href="<?echo 'http://'. $_SERVER['SERVER_NAME']. "/forgetUsername.php"; ?>" tabindex="4">Forget Username?</a></div>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row" style="height: 35px">Password</th>
-				<td style="height: 35px">
-				<div class="inputTableRow">
-					<input name="password" type="password" style="width: 150px; height: 22px" tabindex="2" />
-				</div>
-				</td>
-				<td style="height: 35px">
-				<div class="forgetLink"><a href="forgetPassword.php" tabindex="5">Forget Password?</a></div>
+				<div class="forgetLink"></div>
 				</td>
 			</tr>
 			<tr>
 				<th height="35" scope="row">&nbsp;</th>
 				<td>
 				<div class="inputTableRow">
-					<input name="Submit1" type="submit" value="submit" tabindex="3" /> </div>
+					<input name="Submit1" type="submit" value="submit" /> </div>
 				</td>
 				<td>
 				<div class="fieldErrorMsg">
@@ -130,12 +121,22 @@ $isLogin= $l->validation($_POST["username"], $_POST["password"], 'http://'. $_SE
 				<th height="35" scope="row">&nbsp;</th>
 				<td colspan="2">
 					<div class="fieldErrorMsg">
-<? if($log> 0 && !$isLogin) echo "Incorrected Username or Password."; ?>
+<?
+$countDown= "Redirect to Login Page in <span class=\"counter\" id=\"COUNTDOWN_REDIRECT\">5</span> Sec. ";
+$countDown.= "If not direct to login page, please use <a href=\"http://". $_SERVER['SERVER_NAME']. "/login.php\">this link</a>.";
+if($log> 0){
+	if($isEmailFound){
+		if($isEmailSent) msg::out("An email contained account information is already sent to your email. ". $countDown);
+		else msg::out("Unable to send email to you. Please come back later.");		 
+	}else msg::out("This email, ". $_POST["email"]. ", is not assicated to any account.");
+} 
+?>
 					</div>
 				</td>
 			</tr>
 		</table>
 		<div id="errorMsg">
+<??>
 		</div>
 	</form>
 </div>

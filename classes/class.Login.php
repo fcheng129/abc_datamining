@@ -2,6 +2,7 @@
 require_once("include/config.php");
 require_once('models/UserInfo.php');
 // require_once('class.msg.php');
+require_once('class.ConstVar.php');
 require_once('class.LoginSession.php');
 
 class Login{  
@@ -9,7 +10,7 @@ class Login{
 	// private static $testEnding= "-------------------------- Testing   Ending";
 	private $loginSession;
 	private static $db;
-	const NO_ID= -1;
+	// const NO_ID= -1;
 	
 	public function __construct(){
 		self::initDBConnection();
@@ -22,14 +23,14 @@ class Login{
 	}
 	
 	public function validation($_username, $_password, $_redirectLink= NULL){
-		$id= self::NO_ID;
+		$id= ConstVar::DB_USER_ID_NOT_FOUND;
 		$username= isset($_username)? trim($_username): "";
 		$password= isset($_password)? trim($_password): "";
 		if(strlen($username)> 0 && strlen($password)> 0){
 			// echo "no null<br />";
 			$id= self::$db->getID($username, $password);
 			// echo "no null<br />";
-			if($id!= self::NO_ID){
+			if($id!= ConstVar::DB_USER_ID_NOT_FOUND){
 				// echo "get id: $id<br />";
 				$this->loginSession->createTimeSession(time());
 				$this->loginSession->createIDSession($id);
@@ -81,9 +82,9 @@ class Login{
 		// }else return false;
 	// }
 // 	
-	// public function findUsername($_email){
+	public function findUsername($_email){
 		// global $db;
-		// $sql= "SELECT * FROM Users WHERE `Email`='". $_email. "'";
+		// $sql= "SELECT * FROM Users WHERE `Email`='". $_email. "';";
 		// // msg::display("sql", $sql);
 		// $rs= $db->runSQL($sql);
 		// // msg::oc($db->rowCount($rs));
@@ -92,8 +93,9 @@ class Login{
 			// // msg::oc($rsRow[username]);
 			// return $rsRow["Username"];
 		// }
-		// else return "";	
-	// }
+		// else return "";
+		return self::$db->getUsername($_email);
+	}
 // 	
 	// //check user existed by matching email + username
 	// public function checkUserExisted($_email, $_username){
@@ -109,7 +111,10 @@ class Login{
 		// else return false;	
 	// }
 // 
-	// public function generateVCode($_username, $_email, $_vCode){
+	public function generateVCode($_username, $_email){
+		$vCode= md5($_POST["username"]. time());	
+		self::$db->updateVCode($_username, $_email, $vCode);
+		return $vCode;
 		// global $db;
 		// $_username= trim($_username);
 		// $_email= trim($_email);
@@ -120,9 +125,16 @@ class Login{
 			// //msg::display("sql", $sql);
 			// return $db->ExecuteSQL($sql);
 		// }else return false;
-	// }
+	}
 // 	
-	// public function resetPassword($_username, $_email, $_password, $_vCode){
+	public function resetPassword($_username, $_email, $_vCode, $_password){
+		$isSuccessful= false;
+		$id= self::$db->getIdFromVCode($_username, $_email, $_vCode);
+		// echo $id;
+		if($id!= ConstVar::DB_USER_ID_NOT_FOUND){
+			$isSuccessful= self::$db->changePassword($id, $_password);;
+		}
+		return $isSuccessful;
 		// global $db;
 		// $_username= trim($_username);
 		// $_email= trim($_email);
@@ -141,6 +153,6 @@ class Login{
 			// // msg::display("sql", $sql);
 			// return $db->ExecuteSQL($sql);
 		// }else return false;
-	// }
+	}
 }
 ?>

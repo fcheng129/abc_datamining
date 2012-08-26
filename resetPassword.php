@@ -23,7 +23,7 @@ if($_POST["password"] != $_POST["password2"]) $isPasswordMismatch= true;
 if(isset($vCode) && isset($_POST["email"]) && isSet($_POST["username"]) && !$isPasswordMismatch){
 	$l= new Login();
 	//msg::ot("trying login ". $_POST["username"]. " w password ". $_POST["password"]);
-	$isUpdated= $l->resetPassword($_POST["username"], $_POST["email"], $_POST["password"], $vCode);
+	$isUpdated= $l->resetPassword($_POST["username"], $_POST["email"], $vCode, $_POST["password"]);
 	if($isUpdated){
 		$vCode= "";
 		$_POST["email"]= "";
